@@ -57,21 +57,30 @@ check_wgetcurl(){
 	cleanup 1
 }
 
+get_arch(){
+	# 尝试多种方式获取架构：opkg → apk → uname -m
+	local a
+	a="$(opkg info kernel 2>/dev/null | grep Architecture | awk '{print $2}')"
+	[ -z "$a" ] && a="$(apk info --architecture 2>/dev/null)"
+	[ -z "$a" ] && a="$(uname -m)"
+	echo "$a"
+}
+
 detect_arch(){
 	local Archt
-	Archt="$(opkg info kernel 2>/dev/null | grep Architecture | awk '{print $2}')"
+	Archt="$(get_arch)"
 
 	case "$Archt" in
-	i386|i686)
+	i386|i686|i386|x86)
 		Arch="386"
 		;;
-	x86)
+	x86_64|x86-64|amd64)
 		Arch="amd64"
 		;;
-	mipsel)
+	mipsel|mipsle)
 		Arch="mipsle"
 		;;
-	mips64el)
+	mips64el|mips64le)
 		Arch="mips64le"
 		;;
 	mips)
@@ -80,13 +89,13 @@ detect_arch(){
 	mips64)
 		Arch="mips64"
 		;;
-	arm)
+	arm|armv7*|armv8*)
 		Arch="arm"
 		;;
 	armeb)
 		Arch="armeb"
 		;;
-	aarch64)
+	aarch64|arm64)
 		Arch="arm64"
 		;;
 	*)
@@ -121,7 +130,6 @@ check_latest_version(){
 		update_core
 	else
 		echo "已是最新版本"
-		apply_upx
 		cleanup 0
 	fi
 }
@@ -158,17 +166,17 @@ apply_upx(){
 
 fetch_upx(){
 	local Archt_upx
-	Archt_upx="$(opkg info kernel 2>/dev/null | grep Architecture | awk '{print $2}')"
+	Archt_upx="$(get_arch)"
 
 	case "$Archt_upx" in
-	i386|i686)  Arch="i386";;
-	x86)        Arch="amd64";;
-	mipsel)     Arch="mipsel";;
-	mips64el)   Arch="mipsel";;
-	mips)       Arch="mips";;
-	mips64)     Arch="mips";;
-	arm)        Arch="arm";;
-	aarch64)    Arch="arm64";;
+	i386|i686|x86|i386)  Arch="i386";;
+	x86_64|x86-64|amd64) Arch="amd64";;
+	mipsel|mipsle)       Arch="mipsel";;
+	mips64el|mips64le)   Arch="mipsel";;
+	mips)                 Arch="mips";;
+	mips64)               Arch="mips";;
+	arm|armv7*|armv8*)   Arch="arm";;
+	aarch64|arm64)        Arch="arm64";;
 	*)
 		echo "upx：不支持的架构 $Archt_upx"
 		return 1
@@ -186,7 +194,7 @@ fetch_upx(){
 	$downloader "/tmp/upx-${upx_latest_ver}-${Arch}_linux.tar.xz" "$UPX_URL" 2>&1
 	[ $? -ne 0 ] && { echo "upx 下载失败"; return 1; }
 
-	which xz >/dev/null 2>&1 || opkg install xz >/dev/null 2>&1 || { echo "xz 不可用"; return 1; }
+	which xz >/dev/null 2>&1 || { opkg install xz >/dev/null 2>&1 || apk add xz >/dev/null 2>&1; } || { echo "xz 不可用"; return 1; }
 
 	mkdir -p "/tmp/upx-${upx_latest_ver}-${Arch}_linux"
 	xz -d -c "/tmp/upx-${upx_latest_ver}-${Arch}_linux.tar.xz" | tar -x -C "/tmp" >/dev/null 2>&1

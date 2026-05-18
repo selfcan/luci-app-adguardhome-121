@@ -137,30 +137,33 @@ check_latest_version(){
 apply_upx(){
 	[ -z "$upxflag" ] && return
 
+	local target="${1:-$binpath}"
+	[ ! -f "$target" ] && return
+
 	local filesize
-	filesize="$(ls -l "$binpath" 2>/dev/null | awk '{print $5}')"
+	filesize="$(ls -l "$target" 2>/dev/null | awk '{print $5}')"
+	[ -z "$filesize" ] && return
 	[ "$filesize" -le 8000000 ] && return
 
 	echo "二进制文件大于 8MB，正在使用 upx 压缩..."
 	fetch_upx
 
-	local UPX_BIN="/tmp/upx-${upx_latest_ver}-${Arch}_linux/upx"
+	local UPX_DIR="/tmp/upx-${upx_ver_nov}-${Arch}_linux"
+	local UPX_BIN="${UPX_DIR}/upx"
 	[ ! -x "$UPX_BIN" ] && { echo "upx 可执行文件未找到"; return; }
 
-	mkdir -p "/tmp/AdGuardHomeupdate"
-	rm -rf "/tmp/AdGuardHomeupdate/${binpath##*/}" 2>/dev/null
-
-	$UPX_BIN $upxflag "$binpath" -o "/tmp/AdGuardHomeupdate/${binpath##*/}"
+	local upx_out="/tmp/AdGuardHomeupdate/upx-packed-$$"
+	$UPX_BIN $upxflag "$target" -o "$upx_out"
 	local upxret=$?
-	rm -rf "/tmp/upx-${upx_latest_ver}-${Arch}_linux"
+	rm -rf "$UPX_DIR"
 
 	if [ $upxret -eq 0 ]; then
-		/etc/init.d/AdGuardHome stop nobackup 2>/dev/null
-		rm -f "$binpath"
-		mv -f "/tmp/AdGuardHomeupdate/${binpath##*/}" "$binpath"
-		chmod 755 "$binpath"
-		/etc/init.d/AdGuardHome start 2>/dev/null
+		rm -f "$target"
+		mv -f "$upx_out" "$target"
+		chmod 755 "$target"
 		echo "upx 压缩完成"
+	else
+		rm -f "$upx_out"
 	fi
 }
 
@@ -190,17 +193,18 @@ fetch_upx(){
 		return 1
 	fi
 
-	local UPX_URL="https://github.com/upx/upx/releases/download/${upx_latest_ver}/upx-${upx_latest_ver}-${Arch}_linux.tar.xz"
-	$downloader "/tmp/upx-${upx_latest_ver}-${Arch}_linux.tar.xz" "$UPX_URL" 2>&1
+	upx_ver_nov="$(echo "$upx_latest_ver" | sed 's/^v//')"
+	local UPX_TGZ="/tmp/upx-${upx_ver_nov}-${Arch}_linux.tar.xz"
+	local UPX_URL="https://github.com/upx/upx/releases/download/${upx_latest_ver}/upx-${upx_ver_nov}-${Arch}_linux.tar.xz"
+	$downloader "$UPX_TGZ" "$UPX_URL" 2>&1
 	[ $? -ne 0 ] && { echo "upx 下载失败"; return 1; }
 
 	which xz >/dev/null 2>&1 || { opkg install xz >/dev/null 2>&1 || apk add xz >/dev/null 2>&1; } || { echo "xz 不可用"; return 1; }
 
-	mkdir -p "/tmp/upx-${upx_latest_ver}-${Arch}_linux"
-	xz -d -c "/tmp/upx-${upx_latest_ver}-${Arch}_linux.tar.xz" | tar -x -C "/tmp" >/dev/null 2>&1
+	xz -d -c "$UPX_TGZ" | tar -x -C "/tmp" >/dev/null 2>&1
 
-	[ ! -x "/tmp/upx-${upx_latest_ver}-${Arch}_linux/upx" ] && { echo "upx 解压失败"; return 1; }
-	rm -f "/tmp/upx-${upx_latest_ver}-${Arch}_linux.tar.xz"
+	[ ! -x "/tmp/upx-${upx_ver_nov}-${Arch}_linux/upx" ] && { echo "upx 解压失败"; return 1; }
+	rm -f "$UPX_TGZ"
 }
 
 update_core(){
@@ -253,7 +257,7 @@ update_core(){
 
 	chmod 755 "$downloadbin"
 	echo "下载完成，如已配置 upx 则进行压缩..."
-	apply_upx
+	apply_upx "$downloadbin"
 
 	echo "正在停止服务..."
 	/etc/init.d/AdGuardHome stop nobackup 2>/dev/null

@@ -29,9 +29,9 @@
 
 ![工具与任务](screenshots/03-tools.png)
 
-### 日志
+### 状态
 
-![日志](screenshots/04-log.png)
+![状态](screenshots/04-log.png)
 
 ## 近期变更
 

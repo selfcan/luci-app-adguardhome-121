@@ -17,21 +17,21 @@
 
 ## 截图
 
-### 概览
-
-![概览](screenshots/01-overview.png)
-
 ### 基础设置
 
-![基础设置](screenshots/02-base-setting.png)
+![基础设置](screenshots/01-overview.png)
 
-### 工具与任务
+### 工具规则
 
-![工具与任务](screenshots/03-tools.png)
+![工具](screenshots/02-base-setting.png)
 
-### 状态
+### 页面
 
-![状态](screenshots/04-log.png)
+![页面](screenshots/03-tools.png)
+
+### 概览
+
+![概览](screenshots/04-log.png)
 
 ## 近期变更
 

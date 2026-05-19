@@ -1,33 +1,24 @@
 <%+AdGuardHome/head%>
 <%+cbi/valueheader%>
+<script src="<%=resource%>/twin-bcrypt.min.js"></script>
 <script type="text/javascript">//<![CDATA[
 var hashpassFieldId = '<%=cbid%>';
-function chpass(btn)
-	{
-		btn.disabled = true;
-		btn.value    = '<%:loading...%>';
-		if (typeof bcryptloaded == 'undefined' ){
-		var theHead = document.getElementsByTagName('head').item(0);
-		var myScript = document.createElement('script');
-		myScript.src = '<%=resource%>/twin-bcrypt.min.js';
-		myScript.type = 'text/javascript';
-		myScript.defer = true;
-		theHead.appendChild(myScript);
-		bcryptloaded=1;
-		btn.value    = '<%:Culculate%>';
-		btn.disabled = false;
-		return
-		}
-		var lv = document.getElementById(hashpassFieldId);
-		if (lv.value != ""){
-		var hash = TwinBcrypt.hashSync(lv.value);
-		lv.value=hash;
-		btn.value    = '<%:Please save/apply%>';
-		}else{
-		btn.value    = '<%:is empty%>';
-		btn.disabled = false;
-		}
+function chpass(btn) {
+	var lv = document.getElementById(hashpassFieldId);
+	if (!lv || lv.value === '') {
+		btn.value = '<%:is empty%>';
+		return;
 	}
+	if (typeof TwinBcrypt === 'undefined') {
+		btn.value = '<%:loading...%>';
+		return;
+	}
+	btn.disabled = true;
+	var hash = TwinBcrypt.hashSync(lv.value);
+	lv.value = hash;
+	btn.value = '<%:Please save/apply%>';
+	btn.disabled = false;
+}
 //]]>
 </script>
 		<input data-update="change"<%=

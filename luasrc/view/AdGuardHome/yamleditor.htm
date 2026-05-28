@@ -22,6 +22,7 @@ try {
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			matchBrackets: true
 		});
+		editor.setSize("100%", null);
 	}
 } catch (e) {
 	console.warn('CodeMirror init skipped:', e);
@@ -69,7 +70,7 @@ function use_template(){
 	}, 100);
 })();
 //]]>
-</script> 
+</script>
 <%fs=require"nixio.fs"%>
 <%if fs.access("/tmp/AdGuardHometmpconfig.yaml") then%>
 <input type="button" id="apply_update_button" value="<%:Reload Config%>" onclick=" return reload_config() "/>

@@ -37,8 +37,7 @@
 	word-break: break-all;
 	width: 100%;
 }
-.adg-log-pane .adg-line { padding: 1px 4px; border-radius: 3px; display: block; }
-.adg-log-pane, .adg-log-pane * { line-height: 1.35 !important; }
+.adg-log-pane .adg-line { padding: 0 4px; border-radius: 3px; display: block; }
 .adg-log-pane .adg-info { color: #cfd6df; }
 .adg-log-pane .adg-warn { color: #e8b95a; }
 .adg-log-pane .adg-error { color: #ea7878; background: rgba(234,120,120,.06); }
@@ -70,7 +69,7 @@ function hlLine(ln) {
 	return '<span class="adg-line ' + cls + '">' + ln.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
 }
 function hlLines(text) {
-	return text.split('\n').map(hlLine).join('\n');
+	return text.split('\n').map(hlLine).join('');
 }
 
 function createAndDownloadFile(fileName, content) {
@@ -110,7 +109,7 @@ function chlogtime(){
 }
 function reverselog(){
 	var lv = document.getElementById('cbid.logview.1.conf');
-	lv.innerHTML = lv.textContent.split('\n').reverse().map(hlLine).join('\n');
+	lv.innerHTML = lv.textContent.split('\n').reverse().map(hlLine).join('');
 	if (islogreverse){
 	islogreverse=false;
 	}else{

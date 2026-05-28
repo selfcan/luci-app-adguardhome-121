@@ -253,19 +253,45 @@ body:has(.adg-ov-root) form .cbi-section + .cbi-page-actions { display: none !im
 		}
 	}
 
+	var busy = false;
+	var busyTarget = null;
+
 	function poll() {
-		XHR.get(STATUS_URL, null, function (x, data) { paint(data); });
+		if (busy) return;
+		XHR.get(STATUS_URL, null, function (x, data) { if (!busy) paint(data); });
 	}
 
 	elToggle.addEventListener('change', function (ev) {
 		var want = elToggle.checked ? '1' : '0';
+		var target = want === '1';
+		busy = true;
+		busyTarget = target;
 		elSwitch.classList.add('busy');
 		elToggle.disabled = true;
 		XHR.post(TOGGLE_URL, { enabled: want, token: L && L.env ? L.env.token : '' }, function (x, data) {
-			elSwitch.classList.remove('busy');
-			elToggle.disabled = false;
-			if (data) paint(data);
-			poll();
+			function wait(remain) {
+				XHR.get(STATUS_URL, null, function (x2, sd) {
+					if (sd && sd.running === target) {
+						busy = false;
+						busyTarget = null;
+						elSwitch.classList.remove('busy');
+						elToggle.disabled = false;
+						paint(sd);
+						return;
+					}
+					if (remain > 0) {
+						setTimeout(function() { wait(remain - 1); }, 1000);
+					} else {
+						busy = false;
+						busyTarget = null;
+						elSwitch.classList.remove('busy');
+						elToggle.disabled = false;
+						paint(sd);
+					}
+				});
+			}
+			paint(data);
+			wait(12);
 		});
 	});
 

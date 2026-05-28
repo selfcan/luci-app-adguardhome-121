@@ -233,17 +233,19 @@ body:has(.adg-ov-root) form .cbi-section + .cbi-page-actions { display: none !im
 		elWebUI.href = 'http://' + host + ':<%=httpport%>/';
 	}
 
+	var busy = false;
+
 	function paint(data) {
 		if (!data) return;
 		// status
 		if (data.running) {
 			elStatus.innerHTML = '<span class="adg-ov-dot ok"></span><%:运行中%>';
 			elStatusSub.textContent = '<%:AdGuardHome 正在处理 DNS 请求%>';
-			elToggle.checked = true;
+			if (!busy) elToggle.checked = true;
 		} else {
 			elStatus.innerHTML = '<span class="adg-ov-dot"></span><%:未运行%>';
 			elStatusSub.textContent = data.message || '<%:服务未启动%>';
-			elToggle.checked = false;
+			if (!busy) elToggle.checked = false;
 		}
 		// redirect
 		if (data.redirect) {
@@ -259,9 +261,11 @@ body:has(.adg-ov-root) form .cbi-section + .cbi-page-actions { display: none !im
 
 	elToggle.addEventListener('change', function (ev) {
 		var want = elToggle.checked ? '1' : '0';
+		busy = true;
 		elSwitch.classList.add('busy');
 		elToggle.disabled = true;
 		XHR.post(TOGGLE_URL, { enabled: want, token: L && L.env ? L.env.token : '' }, function (x, data) {
+			busy = false;
 			elSwitch.classList.remove('busy');
 			elToggle.disabled = false;
 			if (data) paint(data);

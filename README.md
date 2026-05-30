@@ -25,13 +25,17 @@
 
 ![基础设置](https://raw.githubusercontent.com/kenzok8/kenzok8/main/screenshot/adguardhome/02-base-setting.png)
 
-### 工具规则
+### 运维
 
-![工具](https://raw.githubusercontent.com/kenzok8/kenzok8/main/screenshot/adguardhome/03-tools.png)
+![运维](https://raw.githubusercontent.com/kenzok8/kenzok8/main/screenshot/adguardhome/03-tools.png)
 
 ### 日志
 
 ![日志](https://raw.githubusercontent.com/kenzok8/kenzok8/main/screenshot/adguardhome/04-log.png)
+
+### 手动配置
+
+![手动配置](https://raw.githubusercontent.com/kenzok8/kenzok8/main/screenshot/adguardhome/05-manual.png)
 
 ## 近期变更
 

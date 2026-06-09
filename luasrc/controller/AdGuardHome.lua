@@ -122,8 +122,8 @@ function toggle_service()
 			result.success = false
 			result.enabled = (old_enabled == "1")
 			result.running = false
-			result.message = "AdGuardHome binary not found at " .. binpath ..
-				". Please download it from the 运维 page first."
+			result.message = "找不到 AdGuardHome 二进制文件（" .. binpath ..
+				"），请先在「运维」页面下载。"
 			http.prepare_content("application/json")
 			http.write_json(result)
 			return
